@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"  # RabbitMQ default
+      - "15672:15672"  # RabbitMQ Management UI
+    networks:
+      - mynetwork
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  cliente-service:
+    image: cliente-service  # Nombre de la imagen que construyas
+    container_name: cliente-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8080"
+    depends_on:
+      - rabbitmq  # Cliente-service depende de RabbitMQ
+      - db        # Cliente-service depende de PostgreSQL
+    networks:
+      - mynetwork
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/cliente_service
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+
+  db:
+    image: postgres:14
+    container_name: postgres
+    environment:
+      POSTGRES_DB: cliente_service
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - mynetwork
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Volumen para persistir datos
+
+networks:
+  mynetwork:
+    driver: bridge
+
+volumes:
+  postgres_data:

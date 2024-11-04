@@ -1,16 +1,18 @@
-package com.nicolas.cliente.service.model;
+package com.nicolas.cliente.service.dto;
 
-import jakarta.persistence.MappedSuperclass;
 import lombok.Data;
 
 @Data
-@MappedSuperclass
-public abstract class Persona {
+public class ClienteDTO {
 
+    private Long clienteId;
     private String nombre;
     private String genero;
     private int edad;
     private String identificacion;
     private String direccion;
     private String telefono;
+    private boolean estado;
+
+    // Evitamos incluir información sensible como la contraseña
 }
